@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>demoEJB · @Stateless session bean</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:16px/1.6 "Segoe UI",system-ui,sans-serif;
+         background:#0f1420; color:#e6edf7; display:flex; justify-content:center; padding:40px 20px; }
+  .wrap { width:100%; max-width:780px; }
+  h1 { font-size:1.6rem; margin:0 0 6px; }
+  .sub { color:#8b9bb4; margin-bottom:26px; font-size:.95rem; }
+  .card { background:#171e2e; border:1px solid #24304a; border-radius:14px; padding:22px; margin-bottom:18px; }
+  .card h2 { font-size:1rem; margin:0 0 14px; color:#9fc3ff; letter-spacing:.4px; text-transform:uppercase; }
+  label { display:block; font-size:.85rem; color:#8b9bb4; margin-bottom:6px; }
+  input { width:100%; padding:11px 12px; border-radius:9px; border:1px solid #2c3a56;
+          background:#0f1420; color:#e6edf7; font-size:1rem; margin-bottom:14px; }
+  button { background:#2f6df6; color:#fff; border:0; border-radius:9px; padding:11px 20px;
+           font-size:.95rem; font-weight:600; cursor:pointer; }
+  button:hover { background:#3b7bff; }
+  pre { background:#0b101b; border:1px solid #24304a; border-radius:10px; padding:16px;
+        overflow:auto; font-size:.9rem; margin:16px 0 0; color:#9be89b; min-height:56px; white-space:pre-wrap; }
+  code { background:#0b101b; padding:2px 6px; border-radius:5px; font-size:.88em; color:#ffd479; }
+  .row { display:flex; gap:14px; }
+  .row > div { flex:1; }
+  .note { font-size:.85rem; color:#8b9bb4; }
+  a { color:#7fb0ff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>demoEJB · <code>@Stateless</code> session bean</h1>
+  <div class="sub">A pooled EJB does your maths. A JAX-RS resource injects it with <code>@EJB</code> — nobody ever writes <code>new TaxCalculatorBean()</code>.</div>
+
+  <div class="card">
+    <h2>Call the EJB</h2>
+    <div class="row">
+      <div>
+        <label for="price">price</label>
+        <input id="price" type="number" value="100" step="0.01">
+      </div>
+      <div>
+        <label for="rate">tax rate (0.08 = 8%)</label>
+        <input id="rate" type="number" value="0.08" step="0.01">
+      </div>
+    </div>
+    <button id="go">GET /api/checkout</button>
+    <pre id="out">waiting…</pre>
+    <p class="note">The <code>servedByBeanInstance</code> value comes from a <code>@PostConstruct</code> field on the bean.
+    Hit the button repeatedly — a single instance usually serves everything, because the pool starts with one instance per WAR.</p>
+  </div>
+
+  <div class="card">
+    <h2>What to look at</h2>
+    <p class="note" style="margin:0">
+      <b>Server log</b> (<code>standalone/log/server.log</code>) — one line per call:
+      <code>[TaxCalculatorBean] calculateTotalWithTax(...) served by instanceId=…</code><br>
+      No SQL, no thread handling, no transaction code in your class — the container supplied all of it.
+    </p>
+  </div>
+</div>
+
+<script>
+const out = document.getElementById('out');
+async function call() {
+  const p = document.getElementById('price').value;
+  const r = document.getElementById('rate').value;
+  out.textContent = 'calling…';
+  try {
+    const res = await fetch(`api/checkout?price=${encodeURIComponent(p)}&rate=${encodeURIComponent(r)}`);
+    const text = await res.text();
+    let shown = text;
+    try { shown = JSON.stringify(JSON.parse(text), null, 2); } catch (e) {}
+    out.textContent = `HTTP ${res.status}\n${shown}`;
+  } catch (e) { out.textContent = 'Error: ' + e; }
+}
+document.getElementById('go').addEventListener('click', call);
+call();
+</script>
+</body>
+</html>

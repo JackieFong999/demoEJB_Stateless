@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example</groupId>
+    <artifactId>demoEJB-Stateless</artifactId>
+    <version>1.0.0</version>
+    <packaging>war</packaging>
+
+    <name>demoEJB-Stateless</name>
+    <description>Minimal @Stateless session bean + JAX-RS client (Jakarta EE 10)</description>
+
+    <properties>
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!--
+          ONE dependency gives you the whole Jakarta EE 10 API:
+            jakarta.ejb.*   (@Stateless, @EJB, @PostConstruct ...)
+            jakarta.ws.rs.* (@Path, @GET, @QueryParam ...)
+            jakarta.enterprise.* (@Inject, beans.xml)
+          "provided" = the container (JBoss EAP / WildFly) already has these classes,
+          so we do NOT bundle them into the WAR.
+        -->
+        <dependency>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-api</artifactId>
+            <version>10.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <!-- Context root becomes http://localhost:8080/demoEJB-Stateless/ -->
+        <finalName>demoEJB-Stateless</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <!-- We use annotations, not web.xml -->
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
